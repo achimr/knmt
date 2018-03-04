@@ -57,6 +57,7 @@ if __name__ == "__main__":
     # https://github.com/keras-team/keras/issues/7303
     dev_out_seq = np.expand_dims(dev_out_seq,-1)
     vocab_size=len(tokenizer.word_counts)+1
+    import pdb; pdb.set_trace()
 
     # Training the model
     embedding_dim = 32 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     val_loss_values = history.history['val_loss']
     perp = np.exp2(history.history['loss'])
     val_perp = np.exp2(history.history['val_loss'])
-    epochs = range(1, len(loss) + 1)
+    epochs = range(1, len(loss_values) + 1)
 
     plot.plot(epochs, loss_values, 'bo', label='Training loss')
     plot.plot(epochs, val_loss_values, 'b', label='Validation loss')
