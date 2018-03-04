@@ -57,7 +57,6 @@ if __name__ == "__main__":
     # https://github.com/keras-team/keras/issues/7303
     dev_out_seq = np.expand_dims(dev_out_seq,-1)
     vocab_size=len(tokenizer.word_counts)+1
-    import pdb; pdb.set_trace()
 
     # Training the model
     embedding_dim = 32 
