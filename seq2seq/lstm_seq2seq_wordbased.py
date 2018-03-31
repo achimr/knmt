@@ -64,8 +64,8 @@ parser.add_argument('--train-file', default='fra-eng/fr_en.train.txt',
                     help='File with tab-separated parallel training data')
 parser.add_argument('--test-file', default='fra-eng/fr_en.test_small.txt',
                     help='File with tab-separated parallel test data')
-parser.add_argument('--epochs', default=20, type=int,
-                    help='Number of training epochs (Default: 20)')
+parser.add_argument('--epochs', default=100, type=int,
+                    help='Number of training epochs (Default: 100)')
 parser.add_argument('--num-samples', default=10000, type=int,
                     help='Number of samples to train on (Default: 10000)')
 args = parser.parse_args()
