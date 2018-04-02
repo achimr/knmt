@@ -22,10 +22,16 @@ from nltk.translate.bleu_score import corpus_bleu
 
 parser = argparse.ArgumentParser(description='Sequence-to-sequence NMT')
 
+parser.add_argument('--model', default='s2sw.h5',
+                    help='Saved model file')
 parser.add_argument('--train-file', default='fra-eng/fr_en.train.txt',
                     help='File with tab-separated parallel training data')
 parser.add_argument('--test-file', default='fra-eng/fr_en.test_small.txt',
                     help='File with tab-separated parallel test data')
+parser.add_argument('--output-tok-file', 
+                    help='File to write tokenized output to')
+parser.add_argument('--ref-tok-file', 
+                    help='File to write tokenized reference to')
 parser.add_argument('--num-samples', default=10000, type=int,
                     help='Number of samples to train on (Default: 10000)')
 args = parser.parse_args()
@@ -34,7 +40,7 @@ latent_dim = 256  # Latent dimensionality of the encoding space.
 num_samples = args.num_samples  # Number of samples to train on.
 
 # Vectorize the data.  We use the same approach as the training script.
-# NOTE: the data must be identical, in order for the character -> integer
+# NOTE: the data must be identical, in order for the word -> integer
 # mappings to be consistent.
 # We omit encoding target_texts since they are not needed.
 input_texts = []
@@ -74,8 +80,7 @@ reverse_target_word_index = dict(
 encoder_input_data = sequence.pad_sequences(encoder_input_seq,maxlen=max_encoder_seq_length,padding='post',truncating='post')
 
 # Restore the model and construct the encoder and decoder.
-model = load_model('s2sw.h5')
-# HERE
+model = load_model(args.model)
 encoder_inputs = model.input[0]   # input_1
 encoder_outputs, state_h, state_c = model.layers[4].output   # lstm_1
 encoder_states = [state_h, state_c]
@@ -159,17 +164,25 @@ ref_test_seqs = target_tokenizer.texts_to_sequences(ref_test_texts)
 decoded = []
 references = []
 #import pdb; pdb.set_trace()
+if args.output_tok_file:
+    output_tok_fh = open(args.output_tok_file, 'w', encoding='utf-8')
+if args.ref_tok_file:
+    ref_tok_fh = open(args.ref_tok_file, 'w', encoding='utf-8')
 for input_data,input_text in zip(input_test_data,input_test_texts):
     input_seq = np.expand_dims(input_data,0)
     decoded_sentence_array = decode_sequence(input_seq)
     decoded_sentence = " ".join(decoded_sentence_array)
     decoded.append(decoded_sentence_array)
+    if args.output_tok_file:
+        print(decoded_sentence,file=output_tok_fh)
     print('-')
     print('Input sentence:', input_text)
     print('Decoded sentence:', decoded_sentence)
 for ref_seq in ref_test_seqs:
     reference_array = [reverse_target_word_index[i] for i in ref_seq]
     references.append([reference_array])
+    if args.ref_tok_file:
+        print(" ".join(reference_array),file=ref_tok_fh)
 #import pdb; pdb.set_trace()
 bleu_score = corpus_bleu(references,decoded)
 print('BLEU score:', bleu_score)
