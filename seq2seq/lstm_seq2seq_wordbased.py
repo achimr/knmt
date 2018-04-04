@@ -72,7 +72,8 @@ args = parser.parse_args()
 
 batch_size = 64  # Batch size for training.
 epochs = args.epochs  # Number of epochs to train for.
-latent_dim = 256  # Latent dimensionality of the encoding space.
+embedding_dim = 256 # Dimensionality of the word embedding
+latent_dim = 256  # Latent dimensionality of LSTM layer
 num_samples = args.num_samples  # Number of samples to train on.
 
 # Vectorize the data.
@@ -117,14 +118,14 @@ decoder_output_data = np.expand_dims(decoder_output_data,-1)
 
 # Define an input sequence and process it.
 encoder_inputs = Input(shape=(None,))
-x = Embedding(num_encoder_tokens, latent_dim)(encoder_inputs)
+x = Embedding(num_encoder_tokens, embedding_dim)(encoder_inputs)
 x, state_h, state_c = LSTM(latent_dim,
                            return_state=True)(x)
 encoder_states = [state_h, state_c]
 
 # Set up the decoder, using `encoder_states` as initial state.
 decoder_inputs = Input(shape=(None,))
-decoder_embed = Embedding(num_decoder_tokens, latent_dim)
+decoder_embed = Embedding(num_decoder_tokens, embedding_dim)
 x = decoder_embed(decoder_inputs)
 decoder_lstm = LSTM(latent_dim, return_sequences=True,return_state=True)
 decoder_outputs, _, _ = decoder_lstm(x, initial_state=encoder_states)
