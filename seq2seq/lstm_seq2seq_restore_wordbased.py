@@ -25,9 +25,11 @@ parser = argparse.ArgumentParser(description='Sequence-to-sequence NMT')
 parser.add_argument('--model', default='s2sw.h5',
                     help='Saved model file')
 parser.add_argument('--train-file', default='fra-eng/fr_en.train.txt',
-                    help='File with tab-separated parallel training data')
+                    help='File with tab-separated parallel training data. Needs to be model training file.')
 parser.add_argument('--test-file', default='fra-eng/fr_en.test_small.txt',
                     help='File with tab-separated parallel test data')
+parser.add_argument('--input-tok-file', 
+                    help='File to write tokenized input to')
 parser.add_argument('--output-tok-file', 
                     help='File to write tokenized output to')
 parser.add_argument('--ref-tok-file', 
@@ -164,19 +166,25 @@ ref_test_seqs = target_tokenizer.texts_to_sequences(ref_test_texts)
 decoded = []
 references = []
 #import pdb; pdb.set_trace()
+if args.input_tok_file:
+    input_tok_fh = open(args.input_tok_file, 'w', encoding='utf-8')
 if args.output_tok_file:
     output_tok_fh = open(args.output_tok_file, 'w', encoding='utf-8')
 if args.ref_tok_file:
     ref_tok_fh = open(args.ref_tok_file, 'w', encoding='utf-8')
 for input_data,input_text in zip(input_test_data,input_test_texts):
+    input_tok = " ".join([reverse_input_word_index[i] for i in input_data])
     input_seq = np.expand_dims(input_data,0)
     decoded_sentence_array = decode_sequence(input_seq)
     decoded_sentence = " ".join(decoded_sentence_array)
     decoded.append(decoded_sentence_array)
+    if args.input_tok_file:
+        print(input_tok,file=input_tok_fh)
     if args.output_tok_file:
         print(decoded_sentence,file=output_tok_fh)
     print('-')
     print('Input sentence:', input_text)
+    print('Input sentence tokenized:', input_tok)
     print('Decoded sentence:', decoded_sentence)
 for ref_seq in ref_test_seqs:
     reference_array = [reverse_target_word_index[i] for i in ref_seq]
